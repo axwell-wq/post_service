@@ -20,4 +20,6 @@ public class PostDto {
 
     private Long authorId;
     private Long projectId;
+    private List<LikeDto> likes;
+    private List<CommentDto> comments;
 }

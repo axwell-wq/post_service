@@ -6,6 +6,7 @@ import faang.school.postservice.mapper.CommentMapper;
 import faang.school.postservice.model.Comment;
 import faang.school.postservice.model.Post;
 import faang.school.postservice.repository.CommentRepository;
+import faang.school.postservice.repository.PostRepository;
 import faang.school.postservice.service.CommentService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final UserServiceClient userServiceClient;
     private final CommentMapper commentMapper;
+    private final PostRepository postRepository;
 
     public CommentDto createComment(CommentDto commentDto) {
         if (userServiceClient.getUser(commentDto.getAuthorId()) == null) {
@@ -31,7 +33,14 @@ public class CommentServiceImpl implements CommentService {
             throw new IllegalArgumentException("Слишком много символов");
         }
 
+        Post post = postRepository.findById(commentDto.getPostId()).orElseThrow(
+                () -> new EntityNotFoundException("Post not found"));
+
         Comment comment = commentMapper.toEntity(commentDto);
+        post.getComments().add(comment);
+
+        postRepository.save(post);
+
         return commentMapper.toDto(commentRepository.save(comment));
     }
 

@@ -35,6 +35,9 @@ public class LikeServiceImpl implements LikeService {
 
         Like like = likeMapper.toEntity(likeDto);
         like.setPost(post);
+        post.getLikes().add(like);
+
+        postRepository.save(post);
         likeRepository.save(like);
     }
 
@@ -54,12 +57,13 @@ public class LikeServiceImpl implements LikeService {
         }
         Like like = likeMapper.toEntity(likeDto);
         like.setComment(comment);
+        comment.getLikes().add(like);
+
+        commentRepository.save(comment);
         likeRepository.save(like);
     }
 
     public void deleteLikeComment(LikeDto likeDto) {
         likeRepository.deleteByCommentIdAndUserId(likeDto.getCommentId(), likeDto.getUserId());
     }
-
-
 }

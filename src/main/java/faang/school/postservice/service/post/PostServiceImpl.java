@@ -2,7 +2,11 @@ package faang.school.postservice.service.post;
 
 import faang.school.postservice.client.ProjectServiceClient;
 import faang.school.postservice.client.UserServiceClient;
+import faang.school.postservice.dto.CommentDto;
+import faang.school.postservice.dto.LikeDto;
 import faang.school.postservice.dto.PostDto;
+import faang.school.postservice.mapper.CommentMapper;
+import faang.school.postservice.mapper.LikeMapper;
 import faang.school.postservice.mapper.PostMapper;
 import faang.school.postservice.model.Post;
 import faang.school.postservice.repository.PostRepository;
@@ -23,6 +27,8 @@ public class PostServiceImpl implements PostService {
     private final UserServiceClient userClient;
     private final ProjectServiceClient projectClient;
     private final PostMapper postMapper;
+    private final LikeMapper likeMapper;
+    private final CommentMapper commentMapper;
 
     public PostDto createDraft(PostDto postDto) {
         checkOwnerPost(postDto);
@@ -63,7 +69,7 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Нет такого поста"));
 
-        return postMapper.toDto(post);
+        return mapLikesAndComments(post);
     }
 
     public List<PostDto> getAllBlackPostsByAuthorId(Long authorId) {
@@ -87,7 +93,6 @@ public class PostServiceImpl implements PostService {
     public List<PostDto> getAllPublicProjectsByAuthorId(Long projectId) {
         List<Post> posts = postRepository.findByProjectId(projectId);
 
-
         return getPostPublic(posts);
     }
 
@@ -102,7 +107,7 @@ public class PostServiceImpl implements PostService {
 
         return outPosts.stream()
                 .sorted(Comparator.comparing(Post::getCreatedAt))
-                .map(postMapper::toDto)
+                .map(post -> mapLikesAndComments(post))
                 .toList();
     }
 
@@ -117,7 +122,7 @@ public class PostServiceImpl implements PostService {
 
         return outPosts.stream()
                 .sorted(Comparator.comparing(Post::getCreatedAt))
-                .map(postMapper::toDto)
+                .map(post -> mapLikesAndComments(post))
                 .toList();
     }
 
@@ -139,5 +144,21 @@ public class PostServiceImpl implements PostService {
         if (projectClient.getProject(postDto.getProjectId()) == null) {
             throw new EntityNotFoundException("Проект не существует");
         }
+    }
+
+    private PostDto mapLikesAndComments(Post post) {
+        List<LikeDto> likeDtoList = post.getLikes().stream()
+                .map(like -> likeMapper.toDto(like))
+                .toList();
+
+        List<CommentDto> commentDtoList = post.getComments().stream()
+                .map(comment -> commentMapper.toDto(comment))
+                .toList();
+
+        PostDto postDto = postMapper.toDto(post);
+        postDto.setLikes(likeDtoList);
+        postDto.setComments(commentDtoList);
+
+        return postDto;
     }
 }
