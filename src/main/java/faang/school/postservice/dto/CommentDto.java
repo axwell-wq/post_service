@@ -21,5 +21,5 @@ public class CommentDto {
 
     @NotNull
     private Long postId;
-    private List<Long> likes;
+    private List<LikeDto> likes;
 }
