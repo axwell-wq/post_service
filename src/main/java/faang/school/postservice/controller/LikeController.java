@@ -1,6 +1,8 @@
 package faang.school.postservice.controller;
 
+import faang.school.postservice.dto.LikeCommentDto;
 import faang.school.postservice.dto.LikeDto;
+import faang.school.postservice.dto.LikePostDto;
 import faang.school.postservice.service.LikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +15,7 @@ public class LikeController {
     private final LikeService likeService;
 
     @PostMapping("/likePost")
-    public void likePost(@RequestBody LikeDto likeDto) {
+    public void likePost(@RequestBody LikePostDto likeDto) {
         likeService.likePost(likeDto);
     }
 
@@ -23,7 +25,7 @@ public class LikeController {
     }
 
     @PostMapping("/likeComment")
-    public void likeComment(@RequestBody LikeDto likeDto) {
+    public void likeComment(@RequestBody LikeCommentDto likeDto) {
         likeService.likeComment(likeDto);
     }
 
