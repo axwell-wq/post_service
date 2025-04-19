@@ -39,7 +39,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentMapper.toEntity(commentDto);
         post.getComments().add(comment);
 
-
+        
 
         postRepository.save(post);
 
