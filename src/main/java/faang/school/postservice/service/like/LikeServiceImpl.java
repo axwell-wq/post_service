@@ -35,10 +35,10 @@ public class LikeServiceImpl implements LikeService {
 
         Like like = likeMapper.toEntity(likeDto);
         like.setPost(post);
-        post.getLikes().add(like);
-
-        postRepository.save(post);
         likeRepository.save(like);
+
+        post.getLikes().add(like);
+        postRepository.save(post);
     }
 
     public void deleteLikePost(LikeDto likeDto) {
@@ -55,12 +55,14 @@ public class LikeServiceImpl implements LikeService {
         if(existComment != null) {
             throw new EntityNotFoundException("Вы уже поставили лайк");
         }
+
         Like like = likeMapper.toEntity(likeDto);
         like.setComment(comment);
-        comment.getLikes().add(like);
-
-        commentRepository.save(comment);
         likeRepository.save(like);
+
+        comment.getLikes().add(like);
+        commentRepository.save(comment);
+
     }
 
     public void deleteLikeComment(LikeDto likeDto) {
