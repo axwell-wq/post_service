@@ -2,6 +2,7 @@ package faang.school.postservice.service.comment;
 
 import faang.school.postservice.client.UserServiceClient;
 import faang.school.postservice.dto.CommentDto;
+import faang.school.postservice.exception.DataValidationException;
 import faang.school.postservice.mapper.CommentMapper;
 import faang.school.postservice.model.Comment;
 import faang.school.postservice.model.Post;
@@ -30,7 +31,7 @@ public class CommentServiceImpl implements CommentService {
             throw new EntityNotFoundException("Нет такого пользователя");
         }
         if (commentDto.getContent().length() > 4096) {
-            throw new IllegalArgumentException("Слишком много символов");
+            throw new DataValidationException("Слишком много символов");
         }
 
         Post post = postRepository.findById(commentDto.getPostId()).orElseThrow(
