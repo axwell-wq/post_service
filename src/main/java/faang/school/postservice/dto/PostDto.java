@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -22,4 +23,5 @@ public class PostDto {
     private Long projectId;
     private List<LikeDto> likes;
     private List<CommentDto> comments;
+    private LocalDateTime publishedAt;
 }

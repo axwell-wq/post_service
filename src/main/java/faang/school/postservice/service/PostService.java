@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface PostService {
 
+    void publishScheduledPosts();
+
     PostDto createDraft(PostDto postDto);
 
     PostDto createPost(Long id);

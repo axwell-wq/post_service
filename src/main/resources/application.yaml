@@ -25,6 +25,18 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+s3:
+  aws_access_key_id: FIRST_ACCESS_KEY
+  aws_secret_access_key: FIRST_SECRET_KEY
+  region: russia-1
+  bucket_name: avatars-bucket
+
+app:
+  scheduler:
+    post-publish-cron: "0 * * * * ?"
+  amount-thread-pool: 10
+  queue-capacity: 100
+
 server:
   port: 8081
 

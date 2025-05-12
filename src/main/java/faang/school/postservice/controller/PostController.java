@@ -1,11 +1,13 @@
 package faang.school.postservice.controller;
 
-import faang.school.postservice.client.UserServiceClient;
+import faang.school.postservice.amazons3.S3BucketOperationService;
 import faang.school.postservice.dto.PostDto;
-import faang.school.postservice.dto.user.UserDto;
 import faang.school.postservice.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -15,6 +17,18 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
+    private final S3BucketOperationService amazonS3service;
+
+    @PostMapping("/{userId}/avatar")
+    public ResponseEntity<String> uploadAvatar(@RequestParam("avatar") MultipartFile file, @PathVariable Long userId) {
+        try {
+            String fileUrl = amazonS3service.uploadAvatar(file, userId);
+            return ResponseEntity.ok(fileUrl);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to upload avatar: " + e.getMessage());
+        }
+    }
 
     @PostMapping("/createdraft")
     public PostDto createDraft(@RequestBody PostDto postDto) {

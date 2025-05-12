@@ -2,6 +2,7 @@ package faang.school.postservice.service.post;
 
 import faang.school.postservice.client.ProjectServiceClient;
 import faang.school.postservice.client.UserServiceClient;
+import faang.school.postservice.config.context.ThreadPoolConfig;
 import faang.school.postservice.dto.CommentDto;
 import faang.school.postservice.dto.LikeDto;
 import faang.school.postservice.dto.PostDto;
@@ -13,12 +14,18 @@ import faang.school.postservice.repository.PostRepository;
 import faang.school.postservice.service.PostService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
@@ -29,12 +36,14 @@ public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
     private final LikeMapper likeMapper;
     private final CommentMapper commentMapper;
+    private final Executor threadPool;
 
     public PostDto createDraft(PostDto postDto) {
         checkOwnerPost(postDto);
 
         Post post = postMapper.toEntity(postDto);
         post.setPublished(false);
+
         return postMapper.toDto(postRepository.save(post));
     }
 
@@ -42,7 +51,10 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Нет такого черновика"));
 
-        post.setPublished(true);
+        if (post.getPublishedAt() == null) {
+            post.setPublished(true);
+        }
+
         Post savePost = postRepository.save(post);
         return postMapper.toDto(savePost);
     }
