@@ -2,7 +2,6 @@ package faang.school.postservice.service.post;
 
 import faang.school.postservice.client.ProjectServiceClient;
 import faang.school.postservice.client.UserServiceClient;
-import faang.school.postservice.config.context.ThreadPoolConfig;
 import faang.school.postservice.dto.CommentDto;
 import faang.school.postservice.dto.LikeDto;
 import faang.school.postservice.dto.PostDto;
@@ -16,13 +15,12 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 @Slf4j
@@ -36,7 +34,7 @@ public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
     private final LikeMapper likeMapper;
     private final CommentMapper commentMapper;
-    private final Executor threadPool;
+    private final ExecutorService threadPool;
 
     public PostDto createDraft(PostDto postDto) {
         checkOwnerPost(postDto);
@@ -107,6 +105,36 @@ public class PostServiceImpl implements PostService {
 
         return getPostPublic(posts);
     }
+
+    public void publishScheduledPosts() {
+        List<Post> postsToPublish = postRepository.findReadyToPublish();
+
+        List<List<Post>> batches = partition(postsToPublish);
+
+        List<CompletableFuture<Void>> futures = batches.stream()
+                .map(batch -> CompletableFuture.runAsync(() -> publishBatch(batch), threadPool))
+                .toList();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+    }
+
+    private <T> List<List<T>> partition(List<T> list) {
+        List<List<T>> batches = new ArrayList<>();
+        for (int i = 0; i < list.size(); i += 1000) {
+            batches.add(list.subList(i, Math.min(i + 1000, list.size())));
+        }
+        return batches;
+    }
+
+    private void publishBatch(List<Post> batch) {
+        batch.forEach(post -> {
+            post.setPublished(true);
+            post.setPublishedAt(LocalDateTime.now());
+        });
+        postRepository.saveAll(batch);
+        log.info("Published {} posts", batch.size());
+    }
+
 
     private List<PostDto> getPostDtos(List<Post> posts) {
         List<Post> outPosts = new ArrayList<>();
