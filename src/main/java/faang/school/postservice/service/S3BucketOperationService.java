@@ -1,12 +1,12 @@
-package faang.school.postservice.amazons3;
+package faang.school.postservice.service;
 
+import faang.school.postservice.amazons3.AmazonS3Client;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -57,14 +57,17 @@ public class S3BucketOperationService {
     @PostConstruct
     public void createBucketIfNotExists() {
         try (S3Client s3Client = amazonS3Client.getS3Client()) {
-            s3Client.createBucket(builder -> builder.bucket(bucketName));
-            log.info("Bucket {} created successfully", bucketName);
-        } catch (S3Exception e) {
-            if (e.awsErrorDetails().errorCode().equals("BucketAlreadyExists")) {
+            boolean bucketExists = s3Client.listBuckets().buckets().stream()
+                    .anyMatch(b -> b.name().equals(bucketName));
+
+            if (bucketExists) {
                 log.info("Bucket {} already exists", bucketName);
             } else {
-                throw new RuntimeException("Failed to create bucket", e);
+                s3Client.createBucket(builder -> builder.bucket(bucketName));
+                log.info("Bucket {} created successfully", bucketName);
             }
+        } catch (S3Exception e) {
+            throw new RuntimeException("Failed to create or check bucket", e);
         }
     }
 

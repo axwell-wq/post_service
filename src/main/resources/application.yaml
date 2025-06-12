@@ -26,14 +26,15 @@ spring:
           name: calculations_channel
 
 s3:
-  aws_access_key_id: FIRST_ACCESS_KEY
-  aws_secret_access_key: FIRST_SECRET_KEY
-  region: russia-1
+  aws_access_key_id: user
+  aws_secret_access_key: password
+  region: us-east-1
   bucket_name: avatars-bucket
+  endpoint: http://localhost:9000
 
 app:
   scheduler:
-    post-publish-cron: "0 * * * * ?"
+    post-publish-cron: "0/30 * * * * ?"
   amount-thread-pool: 10
   queue-capacity: 100
 

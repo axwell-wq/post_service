@@ -8,6 +8,8 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 
+import java.net.URI;
+
 @Component
 public class AmazonS3Client {
 
@@ -20,10 +22,14 @@ public class AmazonS3Client {
     @Value("${s3.region}")
     private String region;
 
+    @Value("${s3.endpoint}")
+    private String endpoint;
+
     public S3Client getS3Client() {
         AwsCredentials credentials = AwsBasicCredentials.create(awsAccessKey, awsSecretKey);
 
         return S3Client.builder()
+                .endpointOverride(URI.create(endpoint))
                 .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .build();

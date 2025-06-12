@@ -1,6 +1,6 @@
 package faang.school.postservice.controller;
 
-import faang.school.postservice.amazons3.S3BucketOperationService;
+import faang.school.postservice.service.S3BucketOperationService;
 import faang.school.postservice.dto.PostDto;
 import faang.school.postservice.service.PostService;
 import lombok.RequiredArgsConstructor;
