@@ -39,6 +39,11 @@ dependencies {
     implementation("software.amazon.awssdk:s3:2.31.28")
 
     /**
+     * Kafka
+     */
+    implementation ("org.apache.kafka:kafka-clients:3.6.1")
+
+    /**
      * Utils & Logging
      */
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
